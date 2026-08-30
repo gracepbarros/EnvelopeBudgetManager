@@ -1,7 +1,6 @@
 {
   "name": "code-react",
   "version": "0.1.0",
-  "homepage": "https://gracepbarros.github.io/EnvelopeBudgetManager",
   "private": true,
   "dependencies": {
     "@testing-library/jest-dom": "^5.17.0",
@@ -11,18 +10,16 @@
     "react": "^18.2.0",
     "react-bootstrap": "^2.9.1",
     "react-dom": "^18.2.0",
-    "react-scripts": "5.0.1",
     "uuid": "^9.0.1",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d build",
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
-  },
+  "dev": "vite",
+  "build": "vite build",
+  "preview": "vite preview",
+  "predeploy": "npm run build",
+  "deploy": "gh-pages -d dist"
+},
   "eslintConfig": {
     "extends": [
       "react-app",
@@ -42,6 +39,8 @@
     ]
   },
   "devDependencies": {
-    "gh-pages": "^6.1.0"
+    "@vitejs/plugin-react": "^6.1.1",
+    "gh-pages": "^6.1.0",
+    "vite": "^8.2.2"
   }
 }
