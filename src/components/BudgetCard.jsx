@@ -4,7 +4,7 @@ import { currencyFormatter } from "../utils";
 export default function BudgetCard({
   name,
   amount,
-  max,
+  allocated,
   isGray,
   hideButtons,
   onAddExpenseClick,
@@ -12,7 +12,7 @@ export default function BudgetCard({
   onEditBudgetClick,
 }) {
   const classNames = [];
-  if (amount > max) {
+  if (amount > allocated) {
     classNames.push("bg-danger", "bg-opacity-10");
   } else if (isGray) {
     classNames.push("bg-light");
@@ -25,19 +25,19 @@ export default function BudgetCard({
           <div className="me-2">{name}</div>
           <div className="d-flex align-items-baseline">
             {currencyFormatter.format(amount)}
-            {max && (
+            {allocated && (
               <span className="text-muted fs-6 ms-1">
-                / {currencyFormatter.format(max)}
+                / {currencyFormatter.format(allocated)}
               </span>
             )}
           </div>
         </Card.Title>
-        {max && (
+        {allocated && (
           <ProgressBar
             className="rounded-pill"
-            variant={getProgressBarVariant(amount, max)}
+            variant={getProgressBarVariant(amount, allocated)}
             min={0}
-            max={max}
+            max={allocated}
             now={amount}
           />
         )}
@@ -66,8 +66,8 @@ export default function BudgetCard({
   );
 }
 
-function getProgressBarVariant(amount, max) {
-  const ratio = amount / max;
+function getProgressBarVariant(amount, allocated) {
+  const ratio = amount / allocated;
   if (ratio < 0.5) return "primary";
   if (ratio < 0.8) return "warning";
   return "danger";

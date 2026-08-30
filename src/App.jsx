@@ -73,7 +73,7 @@ function App() {
                 key={bgt.id}
                 name={bgt.name}
                 amount={amount}
-                max={bgt.max}
+                allocated={bgt.allocated}
                 onAddExpenseClick={() => openAddExpenseModal(bgt.id)}
                 onViewExpenseClick={() => setViewExpenseModalBudgetId(bgt.id)}
                 onEditBudgetClick={() => openEditBudgetModal(bgt.id)}

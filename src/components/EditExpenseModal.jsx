@@ -43,7 +43,7 @@ export default function EditExpenseModal({ expenseId, show, handleClose }) {
               }
             ></Form.Control>
           </Form.Group>
-          <Form.Group className="mb-3" controlId="max">
+          <Form.Group className="mb-3" controlId="amount">
             <Form.Label>Amount</Form.Label>
             <Form.Control
               required

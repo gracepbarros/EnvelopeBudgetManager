@@ -4,13 +4,13 @@ import { useBudgets } from "../contexts/BudgetsContext";
 
 export default function AddBudgetModal({ show, handleClose }) {
   const nameRef = useRef();
-  const maxRef = useRef();
+  const allocatedRef = useRef();
   const { addBudget } = useBudgets();
   function handleSubmit(e) {
     e.preventDefault();
     addBudget({
       name: nameRef.current.value,
-      max: parseFloat(maxRef.current.value),
+      allocated: parseFloat(allocatedRef.current.value),
     });
     handleClose();
   }
@@ -26,10 +26,10 @@ export default function AddBudgetModal({ show, handleClose }) {
             <Form.Label>Name</Form.Label>
             <Form.Control ref={nameRef} type="text" required></Form.Control>
           </Form.Group>
-          <Form.Group className="mb-3" controlId="max">
-            <Form.Label>Maximum Spending</Form.Label>
+          <Form.Group className="mb-3" controlId="allocated">
+            <Form.Label>Allocated Amount</Form.Label>
             <Form.Control
-              ref={maxRef}
+              ref={allocatedRef}
               type="number"
               min={0}
               step={0.01}

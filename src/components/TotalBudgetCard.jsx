@@ -9,12 +9,18 @@ export default function TotalBudgetCard() {
     0
   );
 
-  const max = budgets.reduce(
-    (total, budgets) => total + budgets.max,
+  const allocated = budgets.reduce(
+    (total, budget) => total + budget.allocated,
     0
   );
 
-  if (max === 0) return null;
+  if (allocated === 0) return null;
 
-  return <BudgetCard name="Total" amount={amount} isGray max={max} hideButtons/>;
+  return <BudgetCard
+  name="Total"
+  amount={amount}
+  isGray
+  allocated={allocated}
+  hideButtons
+/>;
 }

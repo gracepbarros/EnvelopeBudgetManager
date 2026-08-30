@@ -4,7 +4,7 @@ import { useBudgets } from "../contexts/BudgetsContext";
 
 export default function EditBudgetModal({ budgetId, show, handleClose }) {
   const nameRef = useRef();
-  const maxRef = useRef();
+  const allocatedRef = useRef();
   const { editBudget, budgets } = useBudgets();
 
   const actualBudget = budgets.filter((bgt) => bgt.id === budgetId);
@@ -14,7 +14,7 @@ export default function EditBudgetModal({ budgetId, show, handleClose }) {
     editBudget({
       budgetId: budgetId,
       newName: nameRef.current.value,
-      newMax: parseFloat(maxRef.current.value),
+      newAllocated: parseFloat(allocatedRef.current.value),
     });
     handleClose();
   }
@@ -37,16 +37,16 @@ export default function EditBudgetModal({ budgetId, show, handleClose }) {
               }
             ></Form.Control>
           </Form.Group>
-          <Form.Group className="mb-3" controlId="max">
-            <Form.Label>Maximum Spending</Form.Label>
+          <Form.Group className="mb-3" controlId="allocated">
+            <Form.Label>Allocated Amount</Form.Label>
             <Form.Control
               required
-              ref={maxRef}
+              ref={allocatedRef}
               type="number"
               min={0}
               step={0.01}
               defaultValue={
-                actualBudget.length !== 0 ? actualBudget[0].max : ""
+                actualBudget.length !== 0 ? actualBudget[0].allocated : ""
               }
             ></Form.Control>
           </Form.Group>
