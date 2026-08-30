@@ -12,6 +12,7 @@ export default function BudgetCard({
   onEditBudgetClick,
 }) {
   const classNames = [];
+  const available = allocated - amount;
   if (amount > allocated) {
     classNames.push("bg-danger", "bg-opacity-10");
   } else if (isGray) {
@@ -21,18 +22,27 @@ export default function BudgetCard({
   return (
     <Card className={classNames.join(" ")}>
       <Card.Body>
-        <Card.Title className="d-flex justify-content-between align-items-baseline fw-normal mb-3">
-          <div className="me-2">{name}</div>
-          <div className="d-flex align-items-baseline">
-            {currencyFormatter.format(amount)}
-            {allocated && (
-              <span className="text-muted fs-6 ms-1">
-                / {currencyFormatter.format(allocated)}
-              </span>
-            )}
-          </div>
+        <Card.Title className="fw-normal mb-3">
+          {name}
         </Card.Title>
-        {allocated && (
+
+        <div className="d-flex justify-content-between mb-1">
+          <span className="text-muted">Allocated Amount</span>
+          <span>{currencyFormatter.format(allocated)}</span>
+        </div>
+
+        <div className="d-flex justify-content-between mb-1">
+          <span className="text-muted">Already Spent</span>
+          <span>{currencyFormatter.format(amount)}</span>
+        </div>
+
+        <div className="d-flex justify-content-between mb-3 fw-bold">
+          <span>Available</span>
+          <span className={available < 0 ? "text-danger" : "text-success"}>
+            {currencyFormatter.format(available)}
+          </span>
+        </div>
+        {allocated > 0 && (
           <ProgressBar
             className="rounded-pill"
             variant={getProgressBarVariant(amount, allocated)}
@@ -57,7 +67,7 @@ export default function BudgetCard({
             <Button 
               variant="outline-secondary" 
               onClick={onEditBudgetClick}>
-              Edit Budget
+              Edit Envelope
             </Button>
           </Stack>
         )}
