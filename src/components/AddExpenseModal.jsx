@@ -13,15 +13,23 @@ export default function AddExpenseModal({
   const descriptionRef = useRef();
   const amountRef = useRef();
   const budgetIdRef = useRef();
+  const dateRef = useRef();
+  const paymentMethodRef = useRef();
 
   const { addExpense, budgets } = useBudgets();
 
+  const today = new Date();
+  const defaultDate = `${today.getFullYear()}-${String(
+    today.getMonth() + 1
+  ).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
   function handleSubmit(e) {
     e.preventDefault();
     addExpense({
       description: descriptionRef.current.value,
       amount: parseFloat(amountRef.current.value),
       budgetId: budgetIdRef.current.value,
+      date: dateRef.current.value,
+      paymentMethod: paymentMethodRef.current.value,
     });
     handleClose();
   }
@@ -53,10 +61,29 @@ export default function AddExpenseModal({
             ></Form.Control>
           </Form.Group>
 
-          <Form.Group className="mb-3" controlId="amount">
-            <Form.Label>Budget</Form.Label>
+          <Form.Group className="mb-3" controlId="date">
+            <Form.Label>Date</Form.Label>
+            <Form.Control
+              ref={dateRef}
+              type="date"
+              defaultValue={defaultDate}
+              required
+            />
+          </Form.Group>
+
+          <Form.Group className="mb-3" controlId="paymentMethod">
+            <Form.Label>Payment Method</Form.Label>
+            <Form.Control
+              ref={paymentMethodRef}
+              type="text"
+              placeholder="e.g. Walmart Mastercard, Tangerine Debit"
+            />
+          </Form.Group>
+
+          <Form.Group className="mb-3" controlId="budgetId">
+            <Form.Label>Envelope</Form.Label>
             <Form.Select defaultValue={defaultBudgetId} ref={budgetIdRef}>
-              <option id={UNCATEGORIZED_BUDGET_ID}>Uncategorized</option>
+              <option value={UNCATEGORIZED_BUDGET_ID}>Unassigned</option>
               {budgets.map((budget) => (
                 <option key={budget.id} value={budget.id}>
                   {budget.name}

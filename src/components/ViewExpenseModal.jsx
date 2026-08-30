@@ -47,9 +47,21 @@ export default function ViewExpenseModal({ budgetId, handleClose }) {
         </Modal.Header>
         <Modal.Body>
           <Stack direction="vertical" gap="3">
-            {expenses.map((expense) => (
-              <Stack direction="horizontal" gap="2" key={expense.id}>
-                <div className="me-auto fs-4">{expense.description}</div>
+              {[...expenses]
+                .sort((a, b) => new Date(b.date) - new Date(a.date))
+                .map((expense) => ( 
+                  <Stack direction="horizontal" gap="2" key={expense.id}>
+                    <div className="me-auto">
+                      <div className="fs-4">{expense.description}</div>
+                      <div className="text-muted">
+                        {expense.date &&
+                          new Date(`${expense.date}T00:00:00`).toLocaleDateString(undefined, {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                          })}
+                  </div>
+                </div>
                 <div className="fs-5">
                   {currencyFormatter.format(expense.amount)}
                 </div>

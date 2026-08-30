@@ -9,18 +9,21 @@ export default function EditExpenseModal({ expenseId, show, handleClose }) {
   const nameRef = useRef();
   const amountRef = useRef();
   const budgetIdRef = useRef();
+  const dateRef = useRef();
+  const paymentMethodRef = useRef();
   const { editExpense, expenses, budgets } = useBudgets();
 
   const actualExpense = expenses.filter((exp) => exp.id === expenseId);
 
   function handleSubmit(e) {
     e.preventDefault();
-    console.log(budgetIdRef.current.value);
     editExpense({
       expenseId: expenseId,
       newName: nameRef.current.value,
       newAmount: parseFloat(amountRef.current.value),
       newBudgetId: budgetIdRef.current.value,
+      newDate: dateRef.current.value,
+      newPaymentMethod: paymentMethodRef.current.value,
     });
     handleClose();
   }
@@ -57,8 +60,33 @@ export default function EditExpenseModal({ expenseId, show, handleClose }) {
             ></Form.Control>
           </Form.Group>
 
+          <Form.Group className="mb-3" controlId="date">
+            <Form.Label>Date</Form.Label>
+            <Form.Control
+              required
+              ref={dateRef}
+              type="date"
+              defaultValue={
+                actualExpense.length !== 0 ? actualExpense[0].date : ""
+              }
+            />
+          </Form.Group>
+
+          <Form.Group className="mb-3" controlId="paymentMethod">
+            <Form.Label>Payment Method</Form.Label>
+            <Form.Control
+              ref={paymentMethodRef}
+              type="text"
+              defaultValue={
+                actualExpense.length !== 0
+                  ? actualExpense[0].paymentMethod || ""
+                  : ""
+              }
+            />
+          </Form.Group>
+
           <Form.Group className="mb-3" controlId="budgetId">
-            <Form.Label>Budget</Form.Label>
+            <Form.Label>Envelope</Form.Label>
             <Form.Select
               defaultValue={
                 actualExpense.length !== 0
