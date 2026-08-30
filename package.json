@@ -1,7 +1,7 @@
 {
   "name": "code-react",
   "version": "0.1.0",
-  "homepage": "https://gracepbarros.github.io/ReactBudgetManager",
+  "homepage": "https://gracepbarros.github.io/EnvelopeBudgetManager",
   "private": true,
   "dependencies": {
     "@testing-library/jest-dom": "^5.17.0",
