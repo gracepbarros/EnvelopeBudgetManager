@@ -6,7 +6,7 @@ export default function BudgetCard({
   amount,
   allocated,
   isGray,
-  isDanger,
+  isWarning,
   hideButtons,
   onAddExpenseClick,
   onViewExpenseClick,
@@ -15,7 +15,9 @@ export default function BudgetCard({
   const classNames = [];
   const hasAllocation = Number.isFinite(allocated);
   const available = hasAllocation ? allocated - amount : null;  
-    if (isDanger || hasAllocation && amount > allocated) {
+    if (isWarning) {
+      classNames.push("bg-warning", "bg-opacity-10");
+    } else if (hasAllocation && amount > allocated) {
       classNames.push("bg-danger", "bg-opacity-10");
     } else if (isGray) {
       classNames.push("bg-light");
@@ -50,7 +52,7 @@ export default function BudgetCard({
           ) : (
             <div className="d-flex justify-content-between mb-3 fw-bold">
               <span>Unassigned Amount</span>
-              <span className="text-danger">{currencyFormatter.format(amount)}</span>
+              <span className="text-warning">{currencyFormatter.format(amount)}</span>
             </div>
           )}
 

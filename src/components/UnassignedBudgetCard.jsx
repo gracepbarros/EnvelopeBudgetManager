@@ -17,6 +17,6 @@ export default function UnassignedBudgetCard(props) {
   return <BudgetCard 
     name="Unassigned" 
     amount={amount} 
-    isDanger {...props} 
+    isWarning {...props} 
   />;
 }

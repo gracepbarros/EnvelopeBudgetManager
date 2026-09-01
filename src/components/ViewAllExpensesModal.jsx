@@ -1,5 +1,5 @@
 import { Modal, Button, Stack } from "react-bootstrap";
-import { useBudgets } from "../contexts/BudgetsContext";
+import { UNASSIGNED_BUDGET_ID, useBudgets } from "../contexts/BudgetsContext";
 import { currencyFormatter } from "../utils";
 import { useState } from "react";
 import EditExpenseModal from "./EditExpenseModal";
@@ -33,7 +33,27 @@ export default function ViewAllExpensesModal({ show, handleClose }) {
                 .map((expense) => (              
                 <Stack direction="horizontal" gap="2" key={expense.id}>
                   <div className="me-auto">
-                    <div className="fs-4">{expense.description}</div>
+                    {expense.budgetId === UNASSIGNED_BUDGET_ID ? (
+                      <div className="text-warning fs-4 fw-semibold">
+                        <img
+                          src={`${import.meta.env.BASE_URL}Warning.ico`}
+                          alt="Warning icon"
+                          title="Unassigned Expense"
+                          style={{
+                            width: "18px",
+                            height: "18px",
+                            marginRight: "8px",
+                            marginBottom: "2px"
+                          }}
+                        />
+                        {expense.description}
+                      </div>
+                    ) : (
+                      
+                      <div className="fs-4">{expense.description}</div>
+
+                    )}
+
                     <div className="text-muted">
                       {expense.date &&
                         new Date(`${expense.date}T00:00:00`).toLocaleDateString(undefined, {
@@ -54,7 +74,7 @@ export default function ViewAllExpensesModal({ show, handleClose }) {
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    width="16"
+                    width="12"
                     height="16"
                     fill="currentColor"
                     className="bi bi-pen"

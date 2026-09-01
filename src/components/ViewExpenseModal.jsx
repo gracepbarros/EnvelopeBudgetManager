@@ -71,7 +71,7 @@ export default function ViewExpenseModal({ budgetId, handleClose }) {
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    width="16"
+                    width="12"
                     height="16"
                     fill="currentColor"
                     className="bi bi-pen"
