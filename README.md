@@ -16,14 +16,18 @@ Instead of treating each category as a spending limit, the goal is to allow user
 
 ## Current Version
 
-The application currently supports the functionality inherited from the original project:
+The application currently supports:
 
-* Create budget categories
-* Set spending limits
-* Add expenses
-* Edit expenses
-* View expenses by category
-* Store data locally in the browser
+* Create and manage budgeting envelopes
+* Allocate a planned amount to each envelope
+* Track spent and available amounts
+* Add and edit expenses
+* Assign expenses to envelopes
+* Record transaction dates
+* Record payment methods
+* Sort expenses chronologically
+* Identify and highlight unassigned expenses
+* Store application data locally in the browser
 * Responsive interface using Bootstrap
 
 The project has also been migrated from **Create React App to Vite** as the first step in modernizing the application.
@@ -44,14 +48,14 @@ The application will progressively move from a simple budget tracker to an envel
 
 Planned features include:
 
-* Envelope-based money allocation
+* Financial account management
 * Income tracking
+* Income allocation across envelopes
 * Budget cycles based on pay periods
-* Expense dates and transaction history
 * Envelope rollover between cycles
 * Resettable spending categories
 * Savings and sinking funds
-* Credit card expense tracking
+* Credit card statement tracking
 * Persistent database storage
 * Backend REST API
 * User authentication
@@ -90,13 +94,30 @@ The backend and database have not yet been implemented.
 
 ### Phase 2 — Envelope Budgeting
 
-* [ ] Replace the current budget-limit model with envelopes
-* [ ] Add money allocations
-* [ ] Add income tracking
-* [ ] Add transaction dates
-* [ ] Calculate available envelope balances
+* [x] Replace spending limits with allocated amounts
+* [x] Calculate allocated, spent, and available envelope balances
+* [x] Add transaction dates
+* [x] Add payment method information
+* [x] Add chronological expense sorting
+* [x] Add unassigned expense handling
+* [x] Add visual warnings for unassigned expenses
 
-### Phase 3 — Budget Cycles
+### Phase 3 — Account Management
+
+* [ ] Create financial accounts
+* [ ] Add account types
+* [ ] Edit and delete accounts
+* [ ] Link expenses to accounts
+* [ ] Replace free-text payment methods with account selection
+
+### Phase 4 — Income & Allocation
+
+* [ ] Record income
+* [ ] Link income to the receiving account
+* [ ] Track money available to allocate
+* [ ] Allocate income across envelopes
+
+### Phase 5 — Budget Cycles
 
 * [ ] Create pay-period budget cycles
 * [ ] Close and archive completed cycles
@@ -104,7 +125,7 @@ The backend and database have not yet been implemented.
 * [ ] Support rollover envelopes
 * [ ] Preserve historical financial data
 
-### Phase 4 — Full-Stack Application
+### Phase 6 — Full-Stack Application
 
 * [ ] Create a Node.js backend
 * [ ] Build a REST API with Fastify
@@ -113,10 +134,11 @@ The backend and database have not yet been implemented.
 * [ ] Replace browser-only storage with persistent database storage
 * [ ] Add authentication
 
-### Phase 5 — Additional Features
+### Phase 7 — Additional Features
 
-* [ ] Credit card tracking
+* [ ] Credit card statement tracking
 * [ ] Recurring expenses
+* [ ] Credit card closing and due dates
 * [ ] Savings goals and sinking funds
 * [ ] Financial reports
 * [ ] Automated testing
