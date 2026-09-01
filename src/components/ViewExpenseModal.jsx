@@ -1,8 +1,5 @@
 import { Modal, Button, Stack } from "react-bootstrap";
-import {
-  UNCATEGORIZED_BUDGET_ID,
-  useBudgets,
-} from "../contexts/BudgetsContext";
+import { UNASSIGNED_BUDGET_ID, useBudgets } from "../contexts/BudgetsContext";
 import { currencyFormatter } from "../utils";
 import { useState } from "react";
 import EditExpenseModal from "./EditExpenseModal";
@@ -13,8 +10,8 @@ export default function ViewExpenseModal({ budgetId, handleClose }) {
 
   const expenses = getBudgetExpenses(budgetId);
   const budget =
-    UNCATEGORIZED_BUDGET_ID === budgetId
-      ? { name: "Uncategorized", id: UNCATEGORIZED_BUDGET_ID }
+    UNASSIGNED_BUDGET_ID === budgetId
+      ? { name: "Unassigned", id: UNASSIGNED_BUDGET_ID }
       : budgets.find((b) => b.id === budgetId);
 
   const [showEditExpenseModal, setShowEditExpenseModal] = useState(false);
@@ -33,15 +30,17 @@ export default function ViewExpenseModal({ budgetId, handleClose }) {
           <Modal.Title>
             <Stack direction="horizontal" gap="2">
               <div>{budget?.name} Expenses : </div>
-              <Button
-                onClick={() => {
-                  deleteBudget(budget.id);
-                  handleClose();
-                }}
-                variant="danger"
-              >
-                Delete budget
-              </Button>
+              {budgetId !== UNASSIGNED_BUDGET_ID && (
+                <Button
+                  onClick={() => {
+                    deleteBudget(budget.id);
+                    handleClose();
+                  }}
+                  variant="danger"
+                >
+                  Delete Envelope
+                </Button>
+              )}
             </Stack>
           </Modal.Title>
         </Modal.Header>

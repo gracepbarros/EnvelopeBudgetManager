@@ -4,7 +4,7 @@ import useLocalStorage from "../hooks/localStorage";
 
 const BudgetsContext = React.createContext();
 
-export const UNCATEGORIZED_BUDGET_ID = "Uncategorized";
+export const UNASSIGNED_BUDGET_ID = "Unassigned";
 
 export function useBudgets() {
   return useContext(BudgetsContext);
@@ -54,7 +54,7 @@ export const BudgetsProvider = ({ children }) => {
     setExpenses((prevExpenses) => {
       return prevExpenses.map((expense) => {
         if (expense.budgetId !== budgetId) return expense;
-        return { ...expense, budgetId: UNCATEGORIZED_BUDGET_ID };
+        return { ...expense, budgetId: UNASSIGNED_BUDGET_ID };
       });
     });
 

@@ -6,9 +6,9 @@ import AddExpenseModal from "./components/AddExpenseModal";
 import ViewExpenseModal from "./components/ViewExpenseModal";
 import ViewAllExpensesModal from "./components/ViewAllExpensesModal";
 import EditBudgetModal from "./components/EditBudgetModal";
-import UncategorizedBudgetCard from "./components/UncategorizedBudgetCard";
+import UnassignedBudgetCard from "./components/UnassignedBudgetCard";
 import { useState } from "react";
-import { UNCATEGORIZED_BUDGET_ID, useBudgets } from "./contexts/BudgetsContext";
+import { UNASSIGNED_BUDGET_ID, useBudgets } from "./contexts/BudgetsContext";
 import TotalBudgetCard from "./components/TotalBudgetCard";
 
 function App() {
@@ -80,10 +80,10 @@ function App() {
               />
             );
           })}
-          <UncategorizedBudgetCard
+          <UnassignedBudgetCard
             onAddExpenseClick={openAddExpenseModal}
             onViewExpenseClick={() =>
-              setViewExpenseModalBudgetId(UNCATEGORIZED_BUDGET_ID)
+              setViewExpenseModalBudgetId(UNASSIGNED_BUDGET_ID)
             }
           />
 

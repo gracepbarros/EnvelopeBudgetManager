@@ -1,9 +1,6 @@
 import { useRef } from "react";
 import { Modal, Form, Button } from "react-bootstrap";
-import {
-  useBudgets,
-  UNCATEGORIZED_BUDGET_ID,
-} from "../contexts/BudgetsContext";
+import { useBudgets, UNASSIGNED_BUDGET_ID } from "../contexts/BudgetsContext";
 
 export default function EditExpenseModal({ expenseId, show, handleClose }) {
   const nameRef = useRef();
@@ -91,11 +88,11 @@ export default function EditExpenseModal({ expenseId, show, handleClose }) {
               defaultValue={
                 actualExpense.length !== 0
                   ? actualExpense[0].budgetId
-                  : UNCATEGORIZED_BUDGET_ID
+                  : UNASSIGNED_BUDGET_ID
               }
               ref={budgetIdRef}
             >
-              <option id={UNCATEGORIZED_BUDGET_ID}>Uncategorized</option>
+              <option value={UNASSIGNED_BUDGET_ID}>Unassigned</option>
               {budgets.map((budget) => (
                 <option key={budget.id} value={budget.id}>
                   {budget.name}

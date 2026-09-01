@@ -52,7 +52,7 @@ export default function EditBudgetModal({ budgetId, show, handleClose }) {
           </Form.Group>
           <div className="d-flex justify-content-end">
             <Button type="submit" variant="primary">
-              Finish Edition
+              Save
             </Button>
           </div>
         </Modal.Body>

@@ -1,9 +1,6 @@
 import { useRef } from "react";
 import { Modal, Form, Button } from "react-bootstrap";
-import {
-  useBudgets,
-  UNCATEGORIZED_BUDGET_ID,
-} from "../contexts/BudgetsContext";
+import {useBudgets, UNASSIGNED_BUDGET_ID } from "../contexts/BudgetsContext";
 
 export default function AddExpenseModal({
   show,
@@ -76,14 +73,14 @@ export default function AddExpenseModal({
             <Form.Control
               ref={paymentMethodRef}
               type="text"
-              placeholder="e.g. Walmart Mastercard, Tangerine Debit"
+              placeholder="e.g. Mastercard, RBC Debit..."
             />
           </Form.Group>
 
           <Form.Group className="mb-3" controlId="budgetId">
             <Form.Label>Envelope</Form.Label>
             <Form.Select defaultValue={defaultBudgetId} ref={budgetIdRef}>
-              <option value={UNCATEGORIZED_BUDGET_ID}>Unassigned</option>
+              <option value={UNASSIGNED_BUDGET_ID}>Unassigned</option>
               {budgets.map((budget) => (
                 <option key={budget.id} value={budget.id}>
                   {budget.name}
