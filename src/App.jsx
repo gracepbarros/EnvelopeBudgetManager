@@ -1,5 +1,4 @@
-import Container from "react-bootstrap/Container";
-import { Button, Stack } from "react-bootstrap";
+import { Button, Container, Dropdown, Stack } from "react-bootstrap";
 import BudgetCard from "./components/BudgetCard";
 import AddBudgetModal from "./components/AddBudgetModal";
 import AddExpenseModal from "./components/AddExpenseModal";
@@ -9,6 +8,7 @@ import EditBudgetModal from "./components/EditBudgetModal";
 import UnassignedBudgetCard from "./components/UnassignedBudgetCard";
 import { useState } from "react";
 import { UNASSIGNED_BUDGET_ID, useBudgets } from "./contexts/BudgetsContext";
+import AddAccountModal from "./components/AddAccountModal";
 import TotalBudgetCard from "./components/TotalBudgetCard";
 
 function App() {
@@ -24,6 +24,10 @@ function App() {
   const [showEditBudgetModal, setShowEditBudgetModal] = useState(false);
   const [editBudgetModalBudgetId, setEditBudgetModalBudgetId] = useState();
 
+  const [showAddAccountModal, setShowAddAccountModal] = useState(false);
+
+  const [showMenu, setShowMenu] = useState(false);
+
   const { budgets, getBudgetExpenses } = useBudgets();
 
   function openAddExpenseModal(bgtId) {
@@ -36,23 +40,76 @@ function App() {
     setEditBudgetModalBudgetId(bgtId);
   }
 
+  const primaryHover = {
+  onMouseEnter: (e) => e.currentTarget.classList.add("bg-primary", "text-white"),
+  onMouseLeave: (e) => e.currentTarget.classList.remove("bg-primary","text-white"),
+  };
+
   return (
     <>
       <Container className="my-4">
-        <Stack direction="horizontal" gap="2" className="mb-4">
-          <h1 className="me-auto">Envelopes</h1>
-          <Button variant="primary" onClick={() => setShowAddBudgetModal(true)}>
-            Add Envelope
-          </Button>
-          <Button variant="outline-primary" onClick={openAddExpenseModal}>
-            Add Expense
-          </Button>
-          <Button
-            variant="outline-secondary"
-            onClick={() => setViewAllExpensesModal(true)}
-          >
-            View All Expenses
-          </Button>
+        <Stack direction="horizontal" gap="2" className="flex-wrap w-100 mb-3">
+          <h1 className="display-4 fw-bold mb-0">My Envelope Plan</h1>
+          <Dropdown
+              show={showMenu}
+              onToggle={(isOpen) => setShowMenu(isOpen)}
+              onMouseEnter={() => setShowMenu(true)}
+              onMouseLeave={() => setShowMenu(false)}
+              align="end"
+              className="ms-auto"
+            >
+              <Dropdown.Toggle
+                variant="outline-secondary"
+                id="actions-menu"
+                aria-label="Open actions menu"
+                className="d-flex align-items-center justify-content-center"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="26"
+                  height="26"
+                  fill="currentColor"
+                  viewBox="0 0 16 16"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"
+                  />
+                </svg>
+              </Dropdown.Toggle>
+
+              <Dropdown.Menu>
+                <Dropdown.Item 
+                  {...primaryHover}
+                  onClick={() => setShowAddBudgetModal(true)}
+                >
+                  Add Envelope
+                </Dropdown.Item>
+
+                <Dropdown.Item 
+                  {...primaryHover}
+                  onClick={() => openAddExpenseModal()}
+                >
+                  Add Expense
+                </Dropdown.Item>
+
+                <Dropdown.Item 
+                  {...primaryHover}
+                  onClick={() => setShowViewAllExpensesModal(true)}
+                >
+                  View Expenses
+                </Dropdown.Item>
+
+                <Dropdown.Divider />
+
+                <Dropdown.Item 
+                  {...primaryHover}
+                  onClick={() => setShowAddAccountModal(true)}
+                >
+                  Add Account
+                </Dropdown.Item>
+              </Dropdown.Menu>
+            </Dropdown>
         </Stack>
 
         <div
@@ -116,6 +173,11 @@ function App() {
         budgetId={editBudgetModalBudgetId}
         show={showEditBudgetModal}
         handleClose={() => setShowEditBudgetModal(false)}
+      />
+
+      <AddAccountModal
+        show={showAddAccountModal}
+        handleClose={() => setShowAddAccountModal(false)}
       />
     </>
   );
