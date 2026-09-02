@@ -1,6 +1,8 @@
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Modal, Form, Button } from "react-bootstrap";
 import {useBudgets, UNASSIGNED_BUDGET_ID } from "../contexts/BudgetsContext";
+import AccountDropdown from "./AccountDropdown";
+import EnvelopeDropdown from "./EnvelopeDropdown";
 
 export default function AddExpenseModal({
   show,
@@ -9,11 +11,10 @@ export default function AddExpenseModal({
 }) {
   const descriptionRef = useRef();
   const amountRef = useRef();
-  const budgetIdRef = useRef();
   const dateRef = useRef();
-  const paymentMethodRef = useRef();
-
-  const { addExpense, budgets } = useBudgets();
+  const [budgetId, setBudgetId] = useState(defaultBudgetId || UNASSIGNED_BUDGET_ID);
+  const [accountId, setAccountId] = useState("");
+  const { addExpense } = useBudgets();
 
   const today = new Date();
   const defaultDate = `${today.getFullYear()}-${String(
@@ -24,12 +25,19 @@ export default function AddExpenseModal({
     addExpense({
       description: descriptionRef.current.value,
       amount: parseFloat(amountRef.current.value),
-      budgetId: budgetIdRef.current.value,
+      budgetId,
       date: dateRef.current.value,
-      paymentMethod: paymentMethodRef.current.value,
+      accountId,
     });
     handleClose();
   }
+
+  useEffect(() => {
+    if (show) {
+      setBudgetId(defaultBudgetId || UNASSIGNED_BUDGET_ID);
+      setAccountId("");
+    }
+  }, [show, defaultBudgetId]);
 
   return (
     <Modal show={show} onHide={handleClose}>
@@ -68,29 +76,24 @@ export default function AddExpenseModal({
             />
           </Form.Group>
 
-          <Form.Group className="mb-3" controlId="paymentMethod">
-            <Form.Label>Payment Method</Form.Label>
-            <Form.Control
-              ref={paymentMethodRef}
-              type="text"
-              placeholder="e.g. Mastercard, RBC Debit..."
+          <Form.Group className="mb-3" controlId="account">
+            <Form.Label>Account</Form.Label>
+
+            <AccountDropdown
+              value={accountId}
+              onChange={setAccountId}
             />
           </Form.Group>
 
           <Form.Group className="mb-3" controlId="budgetId">
-            <Form.Label>Envelope</Form.Label>
-            <Form.Select defaultValue={defaultBudgetId} ref={budgetIdRef}>
-              <option value={UNASSIGNED_BUDGET_ID}>Unassigned</option>
-              {budgets.map((budget) => (
-                <option key={budget.id} value={budget.id}>
-                  {budget.name}
-                </option>
-              ))}
-            </Form.Select>
+            <EnvelopeDropdown
+              value={budgetId}
+              onChange={setBudgetId}
+            />
           </Form.Group>
 
           <div className="d-flex justify-content-end">
-            <Button type="submit" variant="primary">
+            <Button type="submit" variant="primary" disabled={!accountId}>
               Add
             </Button>
           </div>

@@ -1,26 +1,37 @@
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Modal, Form, Button } from "react-bootstrap";
 import { useBudgets, UNASSIGNED_BUDGET_ID } from "../contexts/BudgetsContext";
+import AccountDropdown from "./AccountDropdown";
+import EnvelopeDropdown from "./EnvelopeDropdown";
 
 export default function EditExpenseModal({ expenseId, show, handleClose }) {
   const nameRef = useRef();
   const amountRef = useRef();
-  const budgetIdRef = useRef();
   const dateRef = useRef();
-  const paymentMethodRef = useRef();
-  const { editExpense, expenses, budgets } = useBudgets();
-
+  const { editExpense, expenses } = useBudgets();
+  
   const actualExpense = expenses.filter((exp) => exp.id === expenseId);
+  const [budgetId, setBudgetId] = useState("");
+  const [accountId, setAccountId] = useState("");
+
+  useEffect(() => {
+    if (actualExpense.length !== 0) {
+      setAccountId(actualExpense[0].accountId || "");
+      setBudgetId(
+        actualExpense[0].budgetId || UNASSIGNED_BUDGET_ID
+      );
+    }
+  }, [expenseId, show, expenses]);
 
   function handleSubmit(e) {
     e.preventDefault();
     editExpense({
-      expenseId: expenseId,
+      expenseId,
       newName: nameRef.current.value,
       newAmount: parseFloat(amountRef.current.value),
-      newBudgetId: budgetIdRef.current.value,
+      newBudgetId: budgetId,
       newDate: dateRef.current.value,
-      newPaymentMethod: paymentMethodRef.current.value,
+      newAccountId: accountId,
     });
     handleClose();
   }
@@ -69,41 +80,25 @@ export default function EditExpenseModal({ expenseId, show, handleClose }) {
             />
           </Form.Group>
 
-          <Form.Group className="mb-3" controlId="paymentMethod">
-            <Form.Label>Payment Method</Form.Label>
-            <Form.Control
-              ref={paymentMethodRef}
-              type="text"
-              defaultValue={
-                actualExpense.length !== 0
-                  ? actualExpense[0].paymentMethod || ""
-                  : ""
-              }
+          <Form.Group className="mb-3" controlId="editExpenseAccount">
+            <Form.Label>Account</Form.Label>
+            <AccountDropdown
+              value={accountId}
+              onChange={setAccountId}
             />
           </Form.Group>
 
           <Form.Group className="mb-3" controlId="budgetId">
             <Form.Label>Envelope</Form.Label>
-            <Form.Select
-              defaultValue={
-                actualExpense.length !== 0
-                  ? actualExpense[0].budgetId
-                  : UNASSIGNED_BUDGET_ID
-              }
-              ref={budgetIdRef}
-            >
-              <option value={UNASSIGNED_BUDGET_ID}>Unassigned</option>
-              {budgets.map((budget) => (
-                <option key={budget.id} value={budget.id}>
-                  {budget.name}
-                </option>
-              ))}
-            </Form.Select>
+              <EnvelopeDropdown
+                value={budgetId}
+                onChange={setBudgetId}
+              />
           </Form.Group>
 
           <div className="d-flex justify-content-end">
-            <Button type="submit" variant="primary">
-              Finish Edition
+            <Button type="submit" variant="primary" disabled={!accountId}>
+              Save
             </Button>
           </div>
         </Modal.Body>

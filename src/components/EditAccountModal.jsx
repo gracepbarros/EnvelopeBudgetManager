@@ -1,19 +1,31 @@
 import { useRef } from "react";
 import { Button, Form, Modal } from "react-bootstrap";
-import { ACCOUNT_TYPES, useAccounts } from "../contexts/AccountsContext";
+import {
+  ACCOUNT_TYPES,
+  useAccounts,
+} from "../contexts/AccountsContext";
 
-export default function AddAccountModal({ show, handleClose }) {
+export default function EditAccountModal({
+  accountId,
+  show,
+  handleClose,
+}) {
   const nameRef = useRef();
   const typeRef = useRef();
 
-  const { addAccount } = useAccounts();
+  const { accounts, editAccount } = useAccounts();
+
+  const account = accounts.find(
+    (account) => account.id === accountId
+  );
 
   function handleSubmit(e) {
     e.preventDefault();
 
-    addAccount({
-      name: nameRef.current.value,
-      type: typeRef.current.value,
+    editAccount({
+      accountId,
+      newName: nameRef.current.value,
+      newType: typeRef.current.value,
     });
 
     handleClose();
@@ -23,25 +35,33 @@ export default function AddAccountModal({ show, handleClose }) {
     <Modal show={show} onHide={handleClose}>
       <Form onSubmit={handleSubmit}>
         <Modal.Header closeButton>
-          <Modal.Title>New Account</Modal.Title>
+          <Modal.Title>Edit Account</Modal.Title>
         </Modal.Header>
 
         <Modal.Body>
-          <Form.Group className="mb-3" controlId="accountName">
+          <Form.Group
+            className="mb-3"
+            controlId="editAccountName"
+          >
             <Form.Label>Name</Form.Label>
+
             <Form.Control
               ref={nameRef}
               type="text"
-              placeholder="e.g. Tangerine, RBC, CIBC..."
+              defaultValue={account?.name || ""}
               required
             />
           </Form.Group>
 
-          <Form.Group className="mb-3" controlId="accountType">
+          <Form.Group
+            className="mb-3"
+            controlId="editAccountType"
+          >
             <Form.Label>Type</Form.Label>
+
             <Form.Select
               ref={typeRef}
-              defaultValue={ACCOUNT_TYPES[0].value}
+              defaultValue={account?.type}
             >
               {ACCOUNT_TYPES.map((type) => (
                 <option key={type.value} value={type.value}>
@@ -53,7 +73,7 @@ export default function AddAccountModal({ show, handleClose }) {
 
           <div className="d-flex justify-content-end">
             <Button type="submit" variant="primary">
-              Add Account
+              Save
             </Button>
           </div>
         </Modal.Body>

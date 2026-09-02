@@ -13,21 +13,21 @@ export function useBudgets() {
 export const BudgetsProvider = ({ children }) => {
   // Budget contains: id, name, allocated
   const [budgets, setBudgets] = useLocalStorage("budgets", []);
-  // Expense contains: id, budgetId, amount, description, date, paymentMethod
+  // Expense contains: id, budgetId, amount, description, date, accountId
   const [expenses, setExpenses] = useLocalStorage("expenses", []);
 
   function getBudgetExpenses(budgetId) {
     return expenses.filter((expense) => expense.budgetId === budgetId);
   }
 
-  function addExpense({ budgetId, amount, description, date, paymentMethod }) {
+  function addExpense({ budgetId, amount, description, date, accountId }) {
     const newExpense = {
       id: uuidV4(),
       budgetId,
       amount,
       description,
       date,
-      paymentMethod,
+      accountId,
     };
 
     setExpenses((prevExpenses) => {
@@ -76,7 +76,7 @@ export const BudgetsProvider = ({ children }) => {
     });
   }
 
-  function editExpense({ expenseId, newName, newAmount, newBudgetId, newDate, newPaymentMethod }) {
+  function editExpense({ expenseId, newName, newAmount, newBudgetId, newDate, newAccountId }) {
     setExpenses((prevExpenses) => {
       return prevExpenses.map((exp) => {
         if (exp.id !== expenseId) return exp;
@@ -86,7 +86,7 @@ export const BudgetsProvider = ({ children }) => {
           amount: newAmount,
           description: newName,
           date: newDate,
-          paymentMethod: newPaymentMethod,
+          accountId: newAccountId,
         };
       });
     });

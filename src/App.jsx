@@ -9,6 +9,7 @@ import UnassignedBudgetCard from "./components/UnassignedBudgetCard";
 import { useState } from "react";
 import { UNASSIGNED_BUDGET_ID, useBudgets } from "./contexts/BudgetsContext";
 import AddAccountModal from "./components/AddAccountModal";
+import ViewAccountsModal from "./components/ViewAccountsModal";
 import TotalBudgetCard from "./components/TotalBudgetCard";
 
 function App() {
@@ -25,6 +26,7 @@ function App() {
   const [editBudgetModalBudgetId, setEditBudgetModalBudgetId] = useState();
 
   const [showAddAccountModal, setShowAddAccountModal] = useState(false);
+  const [viewAccountsModal, setViewAccountsModal] = useState(false);
 
   const [showMenu, setShowMenu] = useState(false);
 
@@ -85,6 +87,8 @@ function App() {
                 >
                   Add Envelope
                 </Dropdown.Item>
+                
+                <Dropdown.Divider />
 
                 <Dropdown.Item 
                   {...primaryHover}
@@ -95,7 +99,7 @@ function App() {
 
                 <Dropdown.Item 
                   {...primaryHover}
-                  onClick={() => setShowViewAllExpensesModal(true)}
+                  onClick={() => setViewAllExpensesModal(true)}
                 >
                   View Expenses
                 </Dropdown.Item>
@@ -108,6 +112,14 @@ function App() {
                 >
                   Add Account
                 </Dropdown.Item>
+
+                <Dropdown.Item
+                  {...primaryHover}
+                  onClick={() => setViewAccountsModal(true)}
+                >
+                  View Accounts
+                </Dropdown.Item>
+
               </Dropdown.Menu>
             </Dropdown>
         </Stack>
@@ -178,6 +190,11 @@ function App() {
       <AddAccountModal
         show={showAddAccountModal}
         handleClose={() => setShowAddAccountModal(false)}
+      />
+
+      <ViewAccountsModal
+        show={viewAccountsModal}
+        handleClose={() => setViewAccountsModal(false)}
       />
     </>
   );
