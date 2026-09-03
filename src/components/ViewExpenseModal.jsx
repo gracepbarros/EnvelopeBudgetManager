@@ -28,20 +28,7 @@ export default function ViewExpenseModal({ budgetId, handleClose }) {
       <Modal show={budgetId !== undefined} onHide={handleClose}>
         <Modal.Header closeButton>
           <Modal.Title>
-            <Stack direction="horizontal" gap="2">
-              <div>{budget?.name} Expenses : </div>
-              {budgetId !== UNASSIGNED_BUDGET_ID && (
-                <Button
-                  onClick={() => {
-                    deleteBudget(budget.id);
-                    handleClose();
-                  }}
-                  variant="danger"
-                >
-                  Delete Envelope
-                </Button>
-              )}
-            </Stack>
+            {budget?.name} Expenses :
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>

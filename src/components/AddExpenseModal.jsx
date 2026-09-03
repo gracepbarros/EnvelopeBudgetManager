@@ -86,6 +86,8 @@ export default function AddExpenseModal({
           </Form.Group>
 
           <Form.Group className="mb-3" controlId="budgetId">
+            <Form.Label>Envelope</Form.Label>
+
             <EnvelopeDropdown
               value={budgetId}
               onChange={setBudgetId}

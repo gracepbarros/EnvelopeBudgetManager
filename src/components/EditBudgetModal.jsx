@@ -1,13 +1,15 @@
 import { useRef } from "react";
-import { Modal, Form, Button } from "react-bootstrap";
-import { useBudgets } from "../contexts/BudgetsContext";
+import { Modal, Form, Button, Stack } from "react-bootstrap";
+import { useBudgets, UNASSIGNED_BUDGET_ID } from "../contexts/BudgetsContext";
 
 export default function EditBudgetModal({ budgetId, show, handleClose }) {
   const nameRef = useRef();
   const allocatedRef = useRef();
-  const { editBudget, budgets } = useBudgets();
+  const { editBudget, deleteBudget, budgets } = useBudgets();
 
   const actualBudget = budgets.filter((bgt) => bgt.id === budgetId);
+  
+  const budget = budgets.find((b) => b.id === budgetId);
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -50,11 +52,34 @@ export default function EditBudgetModal({ budgetId, show, handleClose }) {
               }
             ></Form.Control>
           </Form.Group>
-          <div className="d-flex justify-content-end">
-            <Button type="submit" variant="primary">
+
+          <Stack 
+            direction="horizontal"   
+            className="justify-content-between"
+          >
+              {budgetId !== UNASSIGNED_BUDGET_ID && (
+                <Button
+                  onClick={() => {
+                    deleteBudget(budget.id);
+                    handleClose();
+                  }}
+                  variant="danger"
+                  size="sm"
+                >
+                  Delete
+                </Button>
+              )}
+
+            <Button 
+              type="submit" 
+              variant="primary"
+              className="ms-auto"
+            >
               Save
             </Button>
-          </div>
+          
+          </Stack>
+          
         </Modal.Body>
       </Form>
     </Modal>
