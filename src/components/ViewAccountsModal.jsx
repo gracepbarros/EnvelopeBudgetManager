@@ -1,10 +1,8 @@
 import { useState } from "react";
 import { Badge, Button, Modal, Stack } from "react-bootstrap";
-import {
-  useAccounts,
-  ACCOUNT_TYPES,
-} from "../contexts/AccountsContext";
+import { useAccounts, ACCOUNT_TYPES } from "../contexts/AccountsContext";
 import { useBudgets } from "../contexts/BudgetsContext";
+import { useIncome } from "../contexts/IncomeContext";
 import EditAccountModal from "./EditAccountModal";
 
 function getAccountType(type) {
@@ -22,14 +20,19 @@ export default function ViewAccountsModal({ show, handleClose }) {
   } = useAccounts();
 
   const { expenses } = useBudgets();
+  const { incomes } = useIncome();
   const [editAccountId, setEditAccountId] = useState();
 
   function handleDelete(account) {
-    const hasExpenses = expenses.some(
-      (expense) => expense.accountId === account.id
-    );
+    const hasTransactions =
+      expenses.some(
+        (expense) => expense.accountId === account.id
+      ) ||
+      incomes.some(
+        (income) => income.accountId === account.id
+      );
 
-    if (hasExpenses) {
+    if (hasTransactions) {
       archiveAccount(account.id);
       return;
     }

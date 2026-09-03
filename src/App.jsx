@@ -11,26 +11,23 @@ import { UNASSIGNED_BUDGET_ID, useBudgets } from "./contexts/BudgetsContext";
 import AddAccountModal from "./components/AddAccountModal";
 import ViewAccountsModal from "./components/ViewAccountsModal";
 import TotalBudgetCard from "./components/TotalBudgetCard";
+import AddIncomeModal from "./components/AddIncomeModal";
+import ViewIncomeModal from "./components/ViewIncomeModal";
 
 function App() {
   const [showAddBudgetModal, setShowAddBudgetModal] = useState(false);
-
   const [viewExpenseModalBudgetId, setViewExpenseModalBudgetId] = useState();
-
   const [viewAllExpensesModal, setViewAllExpensesModal] = useState(false);
-
   const [showAddExpenseModal, setShowAddExpenseModal] = useState(false);
   const [addExpenseModalBudgetId, setAddExpenseModalBudgetId] = useState();
-
   const [showEditBudgetModal, setShowEditBudgetModal] = useState(false);
   const [editBudgetModalBudgetId, setEditBudgetModalBudgetId] = useState();
-
   const [showAddAccountModal, setShowAddAccountModal] = useState(false);
   const [viewAccountsModal, setViewAccountsModal] = useState(false);
-
+  const [showAddIncomeModal, setShowAddIncomeModal] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
-
   const { budgets, getBudgetExpenses } = useBudgets();
+  const [showViewIncomeModal, setShowViewIncomeModal] =useState(false);
 
   function openAddExpenseModal(bgtId) {
     setShowAddExpenseModal(true);
@@ -101,8 +98,24 @@ function App() {
                   {...primaryHover}
                   onClick={() => setViewAllExpensesModal(true)}
                 >
-                  View Expenses
+                  View All Expenses
                 </Dropdown.Item>
+
+                <Dropdown.Divider />
+
+                  <Dropdown.Item
+                    {...primaryHover}
+                    onClick={() => setShowAddIncomeModal(true)}
+                  >
+                    Add Income
+                  </Dropdown.Item>
+
+                  <Dropdown.Item
+                    {...primaryHover}
+                    onClick={() => setShowViewIncomeModal(true) }
+                  >
+                    View Incomes
+                  </Dropdown.Item>
 
                 <Dropdown.Divider />
 
@@ -196,6 +209,17 @@ function App() {
         show={viewAccountsModal}
         handleClose={() => setViewAccountsModal(false)}
       />
+
+      <AddIncomeModal
+        show={showAddIncomeModal}
+        handleClose={() => setShowAddIncomeModal(false)}
+      />
+
+      <ViewIncomeModal
+        show={showViewIncomeModal}
+        handleClose={() => setShowViewIncomeModal(false)}
+      />
+      
     </>
   );
 }
