@@ -53,7 +53,7 @@ export default function AddIncomeModal({
         <Modal.Body>
           <Form.Group
             className="mb-3"
-            controlId="incomeDescription"
+            controlId="addIncomeDescription"
           >
             <Form.Label>Description</Form.Label>
 
@@ -67,7 +67,7 @@ export default function AddIncomeModal({
 
           <Form.Group
             className="mb-3"
-            controlId="incomeAmount"
+            controlId="addIncomeAmount"
           >
             <Form.Label>Amount</Form.Label>
 
@@ -82,7 +82,7 @@ export default function AddIncomeModal({
 
           <Form.Group
             className="mb-3"
-            controlId="incomeDate"
+            controlId="addIncomeDate"
           >
             <Form.Label>Date</Form.Label>
 
@@ -96,7 +96,7 @@ export default function AddIncomeModal({
 
           <Form.Group
             className="mb-3"
-            controlId="incomeAccount"
+            controlId="addIncomeAccount"
           >
             <Form.Label>Account</Form.Label>
 

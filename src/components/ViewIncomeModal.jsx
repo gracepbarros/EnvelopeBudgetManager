@@ -1,9 +1,10 @@
-import { Badge, Modal, Stack } from "react-bootstrap";
+import { Badge, Modal, Stack, Button } from "react-bootstrap";
 import { useIncome } from "../contexts/IncomeContext";
-import {
-  ACCOUNT_TYPES,
-  useAccounts,
-} from "../contexts/AccountsContext";
+import { ACCOUNT_TYPES, useAccounts } from "../contexts/AccountsContext";
+import { currencyFormatter, dateFormatter } from "../utils";
+import EditIncomeModal from "./EditIncomeModal";
+import { useState } from "react";
+
 
 function getAccountType(type) {
   return ACCOUNT_TYPES.find(
@@ -11,24 +12,11 @@ function getAccountType(type) {
   );
 }
 
-function formatDate(date) {
-  if (!date) return "";
-
-  return new Date(`${date}T00:00:00`).toLocaleDateString();
-}
-
-function formatAmount(amount) {
-  return Number(amount).toLocaleString("en-CA", {
-    style: "currency",
-    currency: "CAD",
-  });
-}
-
 export default function ViewIncomeModal({
   show,
   handleClose,
 }) {
-  const { incomes } = useIncome();
+  const { incomes, deleteIncome } = useIncome();
   const { accounts } = useAccounts();
 
   const sortedIncomes = [...incomes].sort(
@@ -41,72 +29,114 @@ export default function ViewIncomeModal({
     );
   }
 
+  const [showEditIncomeModal, setShowEditIncomeModal] = useState(false);
+  const [editIncomeModalIncomeId, setEditIncomeModalIncomeId] = useState();
+  
+  function openEditIncomeModal(incomeId) {
+    handleClose();
+    setShowEditIncomeModal(true);
+    setEditIncomeModalIncomeId(incomeId);
+  }
+
   return (
-    <Modal show={show} onHide={handleClose}>
-      <Modal.Header closeButton>
-        <Modal.Title>Income</Modal.Title>
-      </Modal.Header>
+    <>
+      <Modal show={show} onHide={handleClose}>
+        <Modal.Header closeButton>
+          <Modal.Title>Incomes</Modal.Title>
+        </Modal.Header>
 
-      <Modal.Body>
-        {sortedIncomes.length === 0 ? (
-          <div className="text-muted text-center py-3">
-            No income to display
-          </div>
-        ) : (
-          <Stack gap="3">
-            {sortedIncomes.map((income) => {
-              const account = getAccount(income.accountId);
-              const accountType = account
-                ? getAccountType(account.type)
-                : null;
+        <Modal.Body>
+          {sortedIncomes.length === 0 ? (
+            <div className="text-muted text-center py-3">
+              No incomes to display
+            </div>
+          ) : (
+            <Stack gap="3">
+              {sortedIncomes.map((income) => {
+                const account = getAccount(income.accountId);
+                const accountType = account
+                  ? getAccountType(account.type)
+                  : null;
 
-              return (
-                <Stack
-                  key={income.id}
-                  direction="horizontal"
-                  gap="3"
-                  className="border-bottom pb-3"
-                >
-                  <div className="me-auto">
+                return (
+                  <Stack
+                    key={income.id}
+                    direction="horizontal"
+                    gap="3"
+                    className="border-bottom pb-3"
+                  >
+                    <div className="me-auto">
+                      <div className="fs-5 fw-semibold">
+                        {income.description}
+                      </div>
+
+                      <div className="text-muted small mb-1">
+                        {dateFormatter(income.date)}
+                      </div>
+
+                      {account ? (
+                        <>
+                          <span>{account.name}</span>
+
+                          <Badge
+                            bg={
+                              account.archived
+                                ? "secondary"
+                                : accountType?.bg || "secondary"
+                            }
+                            className="ms-2"
+                          >
+                            {account.type}
+                          </Badge>
+                        </>
+                      ) : (
+                        <span className="text-muted">
+                          No account
+                        </span>
+                      )}
+                    </div>
+
                     <div className="fs-5 fw-semibold">
-                      {income.description}
+                      {currencyFormatter.format(income.amount)}
                     </div>
+                    <Button
+                      onClick={() => openEditIncomeModal(income.id)}
+                      size="sm"
+                      variant="outline-secondary"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="12"
+                        height="16"
+                      fill="currentColor"
+                        className="bi bi-pen"
+                        viewBox="0 0 16 16"
+                      >
+                        <path d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001m-.644.766a.5.5 0 0 0-.707 0L1.95 11.756l-.764 3.057 3.057-.764L14.44 3.854a.5.5 0 0 0 0-.708l-1.585-1.585z" />
+                      </svg>
+                    </Button>  
 
-                    <div className="text-muted small mb-1">
-                      {formatDate(income.date)}
-                    </div>
+                    <Button
+                      onClick={() => deleteIncome(income.id)}
+                      size="sm"
+                      variant="danger"
+                    >
+                      &times;
+                    </Button>                               
+                  </Stack>
+                );
+              })}
+            </Stack>
+          )}
+        </Modal.Body>
+      </Modal>
 
-                    {account ? (
-                      <>
-                        <span>{account.name}</span>
-
-                        <Badge
-                          bg={
-                            account.archived
-                              ? "secondary"
-                              : accountType?.bg || "secondary"
-                          }
-                          className="ms-2"
-                        >
-                          {account.type}
-                        </Badge>
-                      </>
-                    ) : (
-                      <span className="text-muted">
-                        Account unavailable
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="fs-5 fw-semibold">
-                    {formatAmount(income.amount)}
-                  </div>
-                </Stack>
-              );
-            })}
-          </Stack>
-        )}
-      </Modal.Body>
-    </Modal>
+      <EditIncomeModal
+        key={editIncomeModalIncomeId}
+        incomeId={editIncomeModalIncomeId}
+        show={showEditIncomeModal}        
+        handleClose={() => setShowEditIncomeModal(false)}
+      />    
+    </>  
   );
 }
