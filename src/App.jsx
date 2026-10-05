@@ -13,6 +13,7 @@ import ViewAccountsModal from "./components/ViewAccountsModal";
 import TotalBudgetCard from "./components/TotalBudgetCard";
 import AddIncomeModal from "./components/AddIncomeModal";
 import ViewIncomeModal from "./components/ViewIncomeModal";
+import AvailableToAllocateCard from "./components/AvailableToAllocateCard";
 
 function App() {
   const [showAddBudgetModal, setShowAddBudgetModal] = useState(false);
@@ -168,7 +169,7 @@ function App() {
               setViewExpenseModalBudgetId(UNASSIGNED_BUDGET_ID)
             }
           />
-
+          <AvailableToAllocateCard />
           <TotalBudgetCard />
         </div>
       </Container>
@@ -219,7 +220,7 @@ function App() {
         show={showViewIncomeModal}
         handleClose={() => setShowViewIncomeModal(false)}
       />
-      
+
     </>
   );
 }
