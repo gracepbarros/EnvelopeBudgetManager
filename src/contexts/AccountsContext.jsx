@@ -1,6 +1,10 @@
-import React, { useContext } from "react";
-import { v4 as uuidV4 } from "uuid";
-import useLocalStorage from "../hooks/localStorage";
+import React, {
+  useContext,
+  useEffect,
+  useState,
+} from "react";
+import { supabase } from "../lib/supabase";
+import { useAuth } from "./AuthContext";
 
 const AccountsContext = React.createContext();
 
@@ -37,70 +41,205 @@ export function useAccounts() {
 }
 
 export function AccountsProvider({ children }) {
-  // Account contains: id, name, type, archived
-  const [accounts, setAccounts] = useLocalStorage("accounts", []);
+  const { user } = useAuth();
+
+  const [accounts, setAccounts] = useState([]);
+  const [loadingAccounts, setLoadingAccounts] =
+    useState(true);
 
   const activeAccounts = accounts.filter(
     (account) => !account.archived
   );
 
-  function addAccount({ name, type }) {
-    const newAccount = {
-      id: uuidV4(),
-      name,
-      type,
-      archived: false,
+  useEffect(() => {
+    if (!user) {
+      setAccounts([]);
+      setLoadingAccounts(false);
+      return;
+    }
+
+    let ignore = false;
+
+    async function loadAccounts() {
+      setLoadingAccounts(true);
+
+      const { data, error } = await supabase
+        .from("accounts")
+        .select("id, name, type, archived")
+        .order("created_at", {
+          ascending: true,
+        });
+
+      if (error) {
+        console.error(
+          "Error loading accounts:",
+          error
+        );
+
+        if (!ignore) {
+          setLoadingAccounts(false);
+        }
+
+        return;
+      }
+
+      if (!ignore) {
+        setAccounts(data ?? []);
+        setLoadingAccounts(false);
+      }
+    }
+
+    loadAccounts();
+
+    return () => {
+      ignore = true;
     };
+  }, [user]);
 
-    setAccounts((prevAccounts) => {
-      return [...prevAccounts, newAccount];
-    });
-  }
-
-  function editAccount({ accountId, newName, newType }) {
-    setAccounts((prevAccounts) => {
-      return prevAccounts.map((account) => {
-        if (account.id !== accountId) return account;
-
-        return {
-          ...account,
-          name: newName,
-          type: newType,
-        };
-      });
-    });
-  }
-
-  function deleteAccount(accountId) {
-    setAccounts((prevAccounts) => {
-      return prevAccounts.filter((account) => account.id !== accountId);
-    });
-  }
-
-  function archiveAccount(accountId) {
-    setAccounts((prevAccounts) =>
-      prevAccounts.map((account) => {
-        if (account.id !== accountId) return account;
-
-        return {
-          ...account,
-          archived: true,
-        };
+  async function addAccount({ name, type }) {
+    const { data, error } = await supabase
+      .from("accounts")
+      .insert({
+        user_id: user.id,
+        name,
+        type,
+        archived: false,
       })
+      .select("id, name, type, archived")
+      .single();
+
+    if (error) {
+      console.error(
+        "Error adding account:",
+        error
+      );
+      throw error;
+    }
+
+    setAccounts((prevAccounts) => [
+      ...prevAccounts,
+      data,
+    ]);
+
+    return data;
+  }
+
+  async function editAccount({
+    accountId,
+    newName,
+    newType,
+  }) {
+    const { data, error } = await supabase
+      .from("accounts")
+      .update({
+        name: newName,
+        type: newType,
+      })
+      .eq("id", accountId)
+      .eq("user_id", user.id)
+      .select("id, name, type, archived")
+      .single();
+
+    if (error) {
+      console.error(
+        "Error editing account:",
+        error
+      );
+      throw error;
+    }
+
+    setAccounts((prevAccounts) =>
+      prevAccounts.map((account) =>
+        account.id === accountId
+          ? data
+          : account
+      )
+    );
+
+    return data;
+  }
+
+  async function deleteAccount(accountId) {
+    const { error } = await supabase
+      .from("accounts")
+      .delete()
+      .eq("id", accountId)
+      .eq("user_id", user.id);
+
+    if (error) {
+      console.error(
+        "Error deleting account:",
+        error
+      );
+      throw error;
+    }
+
+    setAccounts((prevAccounts) =>
+      prevAccounts.filter(
+        (account) =>
+          account.id !== accountId
+      )
     );
   }
 
-  function restoreAccount(accountId) {
-    setAccounts((prevAccounts) =>
-      prevAccounts.map((account) => {
-        if (account.id !== accountId) return account;
-
-        return {
-          ...account,
-          archived: false,
-        };
+  async function archiveAccount(accountId) {
+    const { data, error } = await supabase
+      .from("accounts")
+      .update({
+        archived: true,
       })
+      .eq("id", accountId)
+      .eq("user_id", user.id)
+      .select("id, name, type, archived")
+      .single();
+
+    if (error) {
+      console.error(
+        "Error archiving account:",
+        error
+      );
+      throw error;
+    }
+
+    setAccounts((prevAccounts) =>
+      prevAccounts.map((account) =>
+        account.id === accountId
+          ? data
+          : account
+      )
     );
+
+    return data;
+  }
+
+  async function restoreAccount(accountId) {
+    const { data, error } = await supabase
+      .from("accounts")
+      .update({
+        archived: false,
+      })
+      .eq("id", accountId)
+      .eq("user_id", user.id)
+      .select("id, name, type, archived")
+      .single();
+
+    if (error) {
+      console.error(
+        "Error restoring account:",
+        error
+      );
+      throw error;
+    }
+
+    setAccounts((prevAccounts) =>
+      prevAccounts.map((account) =>
+        account.id === accountId
+          ? data
+          : account
+      )
+    );
+
+    return data;
   }
 
   return (
@@ -108,11 +247,12 @@ export function AccountsProvider({ children }) {
       value={{
         accounts,
         activeAccounts,
+        loadingAccounts,
         addAccount,
         editAccount,
         deleteAccount,
         archiveAccount,
-        restoreAccount
+        restoreAccount,
       }}
     >
       {children}
