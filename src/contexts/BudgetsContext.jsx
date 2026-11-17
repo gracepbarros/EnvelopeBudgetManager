@@ -5,6 +5,7 @@ import React, {
 } from "react";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "./AuthContext";
+import { useBudgetCycle } from "./BudgetCycleContext";
 
 const BudgetsContext = React.createContext();
 
@@ -12,14 +13,6 @@ export const UNASSIGNED_BUDGET_ID = "Unassigned";
 
 export function useBudgets() {
   return useContext(BudgetsContext);
-}
-
-function mapEnvelope(envelope) {
-  return {
-    id: envelope.id,
-    name: envelope.name,
-    allocated: Number(envelope.allocated),
-  };
 }
 
 function mapExpense(expense) {
@@ -38,8 +31,14 @@ function mapExpense(expense) {
 export function BudgetsProvider({ children }) {
   const { user } = useAuth();
 
+  const {
+    activeCycleId,
+    loadingCycle,
+  } = useBudgetCycle();
+
   const [budgets, setBudgets] = useState([]);
   const [expenses, setExpenses] = useState([]);
+
   const [
     loadingBudgetData,
     setLoadingBudgetData,
@@ -53,6 +52,18 @@ export function BudgetsProvider({ children }) {
       return;
     }
 
+    if (loadingCycle) {
+      setLoadingBudgetData(true);
+      return;
+    }
+
+    if (!activeCycleId) {
+      setBudgets([]);
+      setExpenses([]);
+      setLoadingBudgetData(false);
+      return;
+    }
+
     let ignore = false;
 
     async function loadBudgetData() {
@@ -60,17 +71,24 @@ export function BudgetsProvider({ children }) {
 
       const [
         envelopesResult,
+        allocationsResult,
         expensesResult,
       ] = await Promise.all([
         supabase
           .from("envelopes")
-          .select(
-            "id, name, allocated"
-          )
+          .select("id, name")
           .eq("user_id", user.id)
           .order("created_at", {
             ascending: true,
           }),
+
+        supabase
+          .from("envelope_allocations")
+          .select(
+            "envelope_id, allocated"
+          )
+          .eq("user_id", user.id)
+          .eq("cycle_id", activeCycleId),
 
         supabase
           .from("expenses")
@@ -85,6 +103,7 @@ export function BudgetsProvider({ children }) {
             `
           )
           .eq("user_id", user.id)
+          .eq("cycle_id", activeCycleId)
           .order("created_at", {
             ascending: true,
           }),
@@ -97,6 +116,13 @@ export function BudgetsProvider({ children }) {
         );
       }
 
+      if (allocationsResult.error) {
+        console.error(
+          "Error loading envelope allocations:",
+          allocationsResult.error
+        );
+      }
+
       if (expensesResult.error) {
         console.error(
           "Error loading expenses:",
@@ -105,12 +131,32 @@ export function BudgetsProvider({ children }) {
       }
 
       if (!ignore) {
-        if (!envelopesResult.error) {
-          setBudgets(
-            (envelopesResult.data ?? []).map(
-              mapEnvelope
+        if (
+          !envelopesResult.error &&
+          !allocationsResult.error
+        ) {
+          const allocations = new Map(
+            (allocationsResult.data ?? []).map(
+              (allocation) => [
+                allocation.envelope_id,
+                Number(allocation.allocated),
+              ]
             )
           );
+
+          const mappedBudgets =
+            (envelopesResult.data ?? []).map(
+              (envelope) => ({
+                id: envelope.id,
+                name: envelope.name,
+                allocated:
+                  allocations.get(
+                    envelope.id
+                  ) ?? 0,
+              })
+            );
+
+          setBudgets(mappedBudgets);
         }
 
         if (!expensesResult.error) {
@@ -130,7 +176,11 @@ export function BudgetsProvider({ children }) {
     return () => {
       ignore = true;
     };
-  }, [user]);
+  }, [
+    user,
+    activeCycleId,
+    loadingCycle,
+  ]);
 
   function getBudgetExpenses(budgetId) {
     return expenses.filter(
@@ -143,6 +193,12 @@ export function BudgetsProvider({ children }) {
     name,
     allocated,
   }) {
+    if (!activeCycleId) {
+      throw new Error(
+        "No active budget cycle found"
+      );
+    }
+
     const duplicateBudget = budgets.find(
       (budget) => budget.name === name
     );
@@ -151,27 +207,64 @@ export function BudgetsProvider({ children }) {
       return null;
     }
 
-    const { data, error } = await supabase
+    const {
+      data: envelope,
+      error: envelopeError,
+    } = await supabase
       .from("envelopes")
       .insert({
         user_id: user.id,
         name,
-        allocated: Number(allocated),
       })
-      .select(
-        "id, name, allocated"
-      )
+      .select("id, name")
       .single();
 
-    if (error) {
+    if (envelopeError) {
       console.error(
         "Error adding envelope:",
-        error
+        envelopeError
       );
-      throw error;
+      throw envelopeError;
     }
 
-    const newBudget = mapEnvelope(data);
+    const {
+      data: allocation,
+      error: allocationError,
+    } = await supabase
+      .from("envelope_allocations")
+      .insert({
+        user_id: user.id,
+        cycle_id: activeCycleId,
+        envelope_id: envelope.id,
+        allocated: Number(allocated),
+      })
+      .select("allocated")
+      .single();
+
+    if (allocationError) {
+      console.error(
+        "Error adding envelope allocation:",
+        allocationError
+      );
+
+      // Avoid leaving an envelope behind if
+      // its initial allocation failed.
+      await supabase
+        .from("envelopes")
+        .delete()
+        .eq("id", envelope.id)
+        .eq("user_id", user.id);
+
+      throw allocationError;
+    }
+
+    const newBudget = {
+      id: envelope.id,
+      name: envelope.name,
+      allocated: Number(
+        allocation.allocated
+      ),
+    };
 
     setBudgets((prevBudgets) => [
       ...prevBudgets,
@@ -186,29 +279,70 @@ export function BudgetsProvider({ children }) {
     newName,
     newAllocated,
   }) {
-    const { data, error } = await supabase
+    if (!activeCycleId) {
+      throw new Error(
+        "No active budget cycle found"
+      );
+    }
+
+    const {
+      data: envelope,
+      error: envelopeError,
+    } = await supabase
       .from("envelopes")
       .update({
         name: newName,
-        allocated: Number(newAllocated),
       })
       .eq("id", budgetId)
       .eq("user_id", user.id)
-      .select(
-        "id, name, allocated"
-      )
+      .select("id, name")
       .single();
 
-    if (error) {
+    if (envelopeError) {
       console.error(
         "Error editing envelope:",
-        error
+        envelopeError
       );
-      throw error;
+      throw envelopeError;
     }
 
-    const updatedBudget =
-      mapEnvelope(data);
+    const {
+      data: allocation,
+      error: allocationError,
+    } = await supabase
+      .from("envelope_allocations")
+      .upsert(
+        {
+          user_id: user.id,
+          cycle_id: activeCycleId,
+          envelope_id: budgetId,
+          allocated: Number(
+            newAllocated
+          ),
+        },
+        {
+          onConflict:
+            "cycle_id,envelope_id",
+        }
+      )
+      .select("allocated")
+      .single();
+
+    if (allocationError) {
+      console.error(
+        "Error editing envelope allocation:",
+        allocationError
+      );
+      throw allocationError;
+    }
+
+    const updatedBudget = {
+      id: envelope.id,
+      name: envelope.name,
+      allocated: Number(
+        allocation.allocated
+      ),
+    };
 
     setBudgets((prevBudgets) =>
       prevBudgets.map((budget) =>
@@ -267,6 +401,12 @@ export function BudgetsProvider({ children }) {
     date,
     accountId,
   }) {
+    if (!activeCycleId) {
+      throw new Error(
+        "No active budget cycle found"
+      );
+    }
+
     const envelopeId =
       budgetId === UNASSIGNED_BUDGET_ID ||
       !budgetId
@@ -277,6 +417,7 @@ export function BudgetsProvider({ children }) {
       .from("expenses")
       .insert({
         user_id: user.id,
+        cycle_id: activeCycleId,
         envelope_id: envelopeId,
         account_id: accountId,
         amount: Number(amount),
@@ -340,6 +481,7 @@ export function BudgetsProvider({ children }) {
       })
       .eq("id", expenseId)
       .eq("user_id", user.id)
+      .eq("cycle_id", activeCycleId)
       .select(
         `
           id,
@@ -381,7 +523,8 @@ export function BudgetsProvider({ children }) {
       .from("expenses")
       .delete()
       .eq("id", expenseId)
-      .eq("user_id", user.id);
+      .eq("user_id", user.id)
+      .eq("cycle_id", activeCycleId);
 
     if (error) {
       console.error(
