@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Button, Form, Modal } from "react-bootstrap";
 import { useIncome } from "../contexts/IncomeContext";
+import { useBudgetCycle } from "../contexts/BudgetCycleContext";
 import AccountDropdown from "./AccountDropdown";
 
 export default function AddIncomeModal({
@@ -9,45 +10,56 @@ export default function AddIncomeModal({
 }) {
   const descriptionRef = useRef();
   const amountRef = useRef();
-  const dateRef = useRef();
 
   const [accountId, setAccountId] = useState("");
 
   const { addIncome } = useIncome();
+  const { activeCycle } = useBudgetCycle();
 
-  const today = new Date();
+  const today = new Date().toLocaleDateString("en-CA");
 
-  const defaultDate = `${today.getFullYear()}-${String(
-    today.getMonth() + 1
-  ).padStart(2, "0")}-${String(today.getDate()).padStart(
-    2,
-    "0"
-  )}`;
+  const minDate = activeCycle?.start_date ?? "";
+  const maxDate = activeCycle?.end_date ?? today;
 
-  function handleSubmit(e) {
-    e.preventDefault();
+  const [date, setDate] = useState(today);
 
-    addIncome({
-      description: descriptionRef.current.value,
-      amount: parseFloat(amountRef.current.value),
-      date: dateRef.current.value,
+  useEffect(() => {
+    if (show) {
+      setAccountId("");
+
+      setDate(
+        activeCycle?.end_date ?? today
+      );
+    }
+  }, [
+    show,
+    activeCycle,
+    today,
+  ]);
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+
+    await addIncome({
+      description:
+        descriptionRef.current.value,
+      amount: parseFloat(
+        amountRef.current.value
+      ),
+      date,
       accountId,
     });
 
     handleClose();
   }
 
-  useEffect(() => {
-    if (show) {
-      setAccountId("");
-    }
-  }, [show]);
-
   return (
     <Modal show={show} onHide={handleClose}>
       <Form onSubmit={handleSubmit}>
         <Modal.Header closeButton>
-          <Modal.Title>Add Income</Modal.Title>
+          <Modal.Title>
+            Add Income
+          </Modal.Title>
         </Modal.Header>
 
         <Modal.Body>
@@ -55,7 +67,9 @@ export default function AddIncomeModal({
             className="mb-3"
             controlId="addIncomeDescription"
           >
-            <Form.Label>Description</Form.Label>
+            <Form.Label>
+              Description
+            </Form.Label>
 
             <Form.Control
               ref={descriptionRef}
@@ -69,12 +83,14 @@ export default function AddIncomeModal({
             className="mb-3"
             controlId="addIncomeAmount"
           >
-            <Form.Label>Amount</Form.Label>
+            <Form.Label>
+              Amount
+            </Form.Label>
 
             <Form.Control
               ref={amountRef}
               type="number"
-              min={0}
+              min={0.01}
               step={0.01}
               required
             />
@@ -84,12 +100,18 @@ export default function AddIncomeModal({
             className="mb-3"
             controlId="addIncomeDate"
           >
-            <Form.Label>Date</Form.Label>
+            <Form.Label>
+              Date
+            </Form.Label>
 
             <Form.Control
-              ref={dateRef}
               type="date"
-              defaultValue={defaultDate}
+              value={date}
+              min={minDate}
+              max={maxDate}
+              onChange={(event) =>
+                setDate(event.target.value)
+              }
               required
             />
           </Form.Group>
@@ -98,7 +120,9 @@ export default function AddIncomeModal({
             className="mb-3"
             controlId="addIncomeAccount"
           >
-            <Form.Label>Account</Form.Label>
+            <Form.Label>
+              Account
+            </Form.Label>
 
             <AccountDropdown
               value={accountId}

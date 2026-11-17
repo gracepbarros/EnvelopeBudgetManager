@@ -8,6 +8,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { BudgetsProvider } from "./contexts/BudgetsContext";
 import { AccountsProvider } from "./contexts/AccountsContext";
 import { IncomeProvider } from "./contexts/IncomeContext";
+import { BudgetCycleProvider } from "./contexts/BudgetCycleContext";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
@@ -15,13 +16,15 @@ root.render(
   <React.StrictMode>
     <AuthProvider>
       <AuthGate>
-        <AccountsProvider>
-          <IncomeProvider>
-            <BudgetsProvider>
-              <App />
-            </BudgetsProvider>
-          </IncomeProvider>
-        </AccountsProvider>
+        <BudgetCycleProvider>
+          <AccountsProvider>
+            <IncomeProvider>
+              <BudgetsProvider>
+                <App />
+              </BudgetsProvider>
+            </IncomeProvider>
+          </AccountsProvider>
+        </BudgetCycleProvider>
       </AuthGate>
     </AuthProvider>
   </React.StrictMode>

@@ -1,6 +1,7 @@
-import { useRef, useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button, Form, Modal } from "react-bootstrap";
 import { useIncome } from "../contexts/IncomeContext";
+import { useBudgetCycle } from "../contexts/BudgetCycleContext";
 import AccountDropdown from "./AccountDropdown";
 
 export default function EditIncomeModal({
@@ -10,29 +11,39 @@ export default function EditIncomeModal({
 }) {
   const descriptionRef = useRef();
   const amountRef = useRef();
-  const dateRef = useRef();
+
   const [accountId, setAccountId] = useState("");
+  const [date, setDate] = useState("");
 
   const { editIncome, incomes } = useIncome();
-  
+  const { activeCycle } = useBudgetCycle();
+
   const income = incomes.find(
-      (item) => item.id === incomeId
-    );
+    (item) => item.id === incomeId
+  );
+
+  const today = new Date().toLocaleDateString("en-CA");
+
+  const minDate = activeCycle?.start_date ?? "";
+  const maxDate = activeCycle?.end_date ?? today;
 
   useEffect(() => {
     if (show && income) {
       setAccountId(income.accountId || "");
+      setDate(income.date || "");
     }
-  }, [show, incomeId, incomes]);
+  }, [show, incomeId, incomes, income]);
 
-  function handleSubmit(e) {
-    e.preventDefault();
+  async function handleSubmit(event) {
+    event.preventDefault();
 
-    editIncome({
+    await editIncome({
       incomeId,
       newDescription: descriptionRef.current.value,
-      newAmount: parseFloat(amountRef.current.value),
-      newDate: dateRef.current.value,
+      newAmount: parseFloat(
+        amountRef.current.value
+      ),
+      newDate: date,
       newAccountId: accountId,
     });
 
@@ -70,7 +81,7 @@ export default function EditIncomeModal({
             <Form.Control
               ref={amountRef}
               type="number"
-              min={0}
+              min={0.01}
               step={0.01}
               defaultValue={income?.amount || ""}
               required
@@ -84,9 +95,13 @@ export default function EditIncomeModal({
             <Form.Label>Date</Form.Label>
 
             <Form.Control
-              ref={dateRef}
               type="date"
-              defaultValue={income?.date || ""}
+              value={date}
+              min={minDate}
+              max={maxDate}
+              onChange={(event) =>
+                setDate(event.target.value)
+              }
               required
             />
           </Form.Group>
@@ -103,14 +118,15 @@ export default function EditIncomeModal({
             />
           </Form.Group>
 
-          <Button 
-            type="submit" 
-            variant="primary"
-            className="ms-auto"
-            disabled={!accountId}
-          >
-            Save
-          </Button>             
+          <div className="d-flex justify-content-end">
+            <Button
+              type="submit"
+              variant="primary"
+              disabled={!accountId}
+            >
+              Save
+            </Button>
+          </div>
         </Modal.Body>
       </Form>
     </Modal>

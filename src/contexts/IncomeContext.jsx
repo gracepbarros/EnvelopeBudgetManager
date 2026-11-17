@@ -5,6 +5,7 @@ import React, {
 } from "react";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "./AuthContext";
+import { useBudgetCycle } from "./BudgetCycleContext";
 
 const IncomeContext = React.createContext();
 
@@ -25,12 +26,31 @@ function mapIncome(income) {
 export function IncomeProvider({ children }) {
   const { user } = useAuth();
 
+  const {
+    activeCycleId,
+    loadingCycle,
+  } = useBudgetCycle();
+
   const [incomes, setIncomes] = useState([]);
-  const [loadingIncomes, setLoadingIncomes] =
-    useState(true);
+
+  const [
+    loadingIncomes,
+    setLoadingIncomes,
+  ] = useState(true);
 
   useEffect(() => {
     if (!user) {
+      setIncomes([]);
+      setLoadingIncomes(false);
+      return;
+    }
+
+    if (loadingCycle) {
+      setLoadingIncomes(true);
+      return;
+    }
+
+    if (!activeCycleId) {
       setIncomes([]);
       setLoadingIncomes(false);
       return;
@@ -53,6 +73,7 @@ export function IncomeProvider({ children }) {
           `
         )
         .eq("user_id", user.id)
+        .eq("cycle_id", activeCycleId)
         .order("created_at", {
           ascending: true,
         });
@@ -84,7 +105,11 @@ export function IncomeProvider({ children }) {
     return () => {
       ignore = true;
     };
-  }, [user]);
+  }, [
+    user,
+    activeCycleId,
+    loadingCycle,
+  ]);
 
   async function addIncome({
     description,
@@ -92,10 +117,17 @@ export function IncomeProvider({ children }) {
     date,
     accountId,
   }) {
+    if (!activeCycleId) {
+      throw new Error(
+        "No active budget cycle found"
+      );
+    }
+
     const { data, error } = await supabase
       .from("incomes")
       .insert({
         user_id: user.id,
+        cycle_id: activeCycleId,
         description,
         amount: Number(amount),
         date,
@@ -137,6 +169,12 @@ export function IncomeProvider({ children }) {
     newDate,
     newAccountId,
   }) {
+    if (!activeCycleId) {
+      throw new Error(
+        "No active budget cycle found"
+      );
+    }
+
     const { data, error } = await supabase
       .from("incomes")
       .update({
@@ -147,6 +185,7 @@ export function IncomeProvider({ children }) {
       })
       .eq("id", incomeId)
       .eq("user_id", user.id)
+      .eq("cycle_id", activeCycleId)
       .select(
         `
           id,
@@ -181,11 +220,18 @@ export function IncomeProvider({ children }) {
   }
 
   async function deleteIncome(incomeId) {
+    if (!activeCycleId) {
+      throw new Error(
+        "No active budget cycle found"
+      );
+    }
+
     const { error } = await supabase
       .from("incomes")
       .delete()
       .eq("id", incomeId)
-      .eq("user_id", user.id);
+      .eq("user_id", user.id)
+      .eq("cycle_id", activeCycleId);
 
     if (error) {
       console.error(

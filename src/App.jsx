@@ -1,4 +1,4 @@
-import { Container, Dropdown, Stack } from "react-bootstrap";
+import { Alert, Container, Dropdown, Stack } from "react-bootstrap";
 import { useState } from "react";
 
 import BudgetCard from "./components/BudgetCard";
@@ -13,16 +13,25 @@ import ViewAccountsModal from "./components/ViewAccountsModal";
 import TotalBudgetCard from "./components/TotalBudgetCard";
 import AddIncomeModal from "./components/AddIncomeModal";
 import ViewIncomeModal from "./components/ViewIncomeModal";
-import AvailableToAllocateCard from "./components/AvailableToAllocateCard";
+import CycleCard from "./components/CycleCard";
+import CloseCycleModal from "./components/CloseCycleModal";
+import CycleHistoryModal from "./components/CycleHistoryModal";
+import EditCycleDatesModal from "./components/EditCycleDatesModal";
 import UserMenu from "./components/UserMenu";
 import Footer from "./components/Footer";
 
-import { UNASSIGNED_BUDGET_ID, useBudgets } from "./contexts/BudgetsContext";
+import {
+  UNASSIGNED_BUDGET_ID,
+  useBudgets,
+} from "./contexts/BudgetsContext";
+import { useBudgetCycle } from "./contexts/BudgetCycleContext";
 import { useAuth } from "./contexts/AuthContext";
 
 function App() {
-  const [showAddBudgetModal, setShowAddBudgetModal] =
-    useState(false);
+  const [
+    showAddBudgetModal,
+    setShowAddBudgetModal,
+  ] = useState(false);
 
   const [
     viewExpenseModalBudgetId,
@@ -74,10 +83,34 @@ function App() {
     setShowViewIncomeModal,
   ] = useState(false);
 
-  const [showMenu, setShowMenu] = useState(false);
+  const [
+    showCloseCycleModal,
+    setShowCloseCycleModal,
+  ] = useState(false);
 
-  const { budgets, getBudgetExpenses } =
-    useBudgets();
+  const [
+    showCycleHistoryModal,
+    setShowCycleHistoryModal,
+  ] = useState(false);
+
+  const [
+  showEditCycleDatesModal,
+  setShowEditCycleDatesModal,
+  ] = useState(false);
+
+  const [showMenu, setShowMenu] =
+    useState(false);
+
+  const {
+    budgets,
+    getBudgetExpenses,
+  } = useBudgets();
+
+  const {
+    isReopenedCycle,
+    activeCycle,
+    pausedCycle,
+  } = useBudgetCycle();
 
   const { user } = useAuth();
 
@@ -207,7 +240,9 @@ function App() {
                 <Dropdown.Item
                   {...primaryHover}
                   onClick={() =>
-                    setViewAllExpensesModal(true)
+                    setViewAllExpensesModal(
+                      true
+                    )
                   }
                 >
                   View All Expenses
@@ -256,6 +291,52 @@ function App() {
             </Dropdown>
           </Stack>
 
+          {isReopenedCycle && (
+            <Alert
+              variant="warning"
+              className="mb-4"
+            >
+              <div className="fw-semibold">
+                Editing a previous budget cycle
+              </div>
+
+              <div className="small mt-1">
+                Your current cycle is safely
+                paused. Finish this previous
+                cycle when your corrections are
+                complete.
+              </div>
+
+              {activeCycle?.start_date &&
+                activeCycle?.end_date && (
+                  <div className="small mt-2">
+                    Editing:{" "}
+                    <strong>
+                      {new Date(
+                        `${activeCycle.start_date}T00:00:00`
+                      ).toLocaleDateString()}
+                      {" – "}
+                      {new Date(
+                        `${activeCycle.end_date}T00:00:00`
+                      ).toLocaleDateString()}
+                    </strong>
+                  </div>
+                )}
+
+              {pausedCycle?.start_date && (
+                <div className="small mt-1">
+                  Current cycle paused:{" "}
+                  <strong>
+                    {new Date(
+                      `${pausedCycle.start_date}T00:00:00`
+                    ).toLocaleDateString()}
+                    {" – Present"}
+                  </strong>
+                </div>
+              )}
+            </Alert>
+          )}
+
           <div
             style={{
               display: "grid",
@@ -280,7 +361,9 @@ function App() {
                   key={budget.id}
                   name={budget.name}
                   amount={amount}
-                  allocated={budget.allocated}
+                  allocated={
+                    budget.allocated
+                  }
                   onAddExpenseClick={() =>
                     openAddExpenseModal(
                       budget.id
@@ -311,7 +394,17 @@ function App() {
               }
             />
 
-            <AvailableToAllocateCard />
+            <CycleCard
+              onOpenCycleHistory={() =>
+                setShowCycleHistoryModal(true)
+              }
+              onOpenEditCycleDates={() =>
+                setShowEditCycleDatesModal(true)
+              }
+              onOpenCloseCycle={() =>
+                setShowCloseCycleModal(true)
+              }
+            />
 
             <TotalBudgetCard />
           </div>
@@ -336,7 +429,9 @@ function App() {
       />
 
       <ViewExpenseModal
-        budgetId={viewExpenseModalBudgetId}
+        budgetId={
+          viewExpenseModalBudgetId
+        }
         handleClose={() =>
           setViewExpenseModalBudgetId()
         }
@@ -382,6 +477,27 @@ function App() {
         show={showViewIncomeModal}
         handleClose={() =>
           setShowViewIncomeModal(false)
+        }
+      />
+
+      <CycleHistoryModal
+        show={showCycleHistoryModal}
+        handleClose={() =>
+          setShowCycleHistoryModal(false)
+        }
+      />
+
+      <CloseCycleModal
+        show={showCloseCycleModal}
+        handleClose={() =>
+          setShowCloseCycleModal(false)
+        }
+      />
+
+      <EditCycleDatesModal
+        show={showEditCycleDatesModal}
+        handleClose={() =>
+          setShowEditCycleDatesModal(false)
         }
       />
 
